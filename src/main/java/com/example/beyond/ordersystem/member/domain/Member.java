@@ -2,6 +2,7 @@ package com.example.beyond.ordersystem.member.domain;
 
 import com.example.beyond.ordersystem.common.domain.Address;
 import com.example.beyond.ordersystem.common.domain.BaseTimeEntity;
+import com.example.beyond.ordersystem.member.dto.MemberDetailDto;
 import com.example.beyond.ordersystem.member.dto.MemberListDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +24,7 @@ public class Member extends BaseTimeEntity {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false, length = 6)
+    @Column(nullable = false)
     private String password;
     @Embedded
     private Address address;
@@ -32,14 +33,23 @@ public class Member extends BaseTimeEntity {
     private String phone;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ENUM('ADMIN', 'USER') DEFAULT 'USER'")
-    private Role role;
+    @Builder.Default
+    private Role role = Role.USER;
 
     public MemberListDto listFromEntity() {
         return MemberListDto.builder()
                 .id(this.id)
                 .name(this.name)
                 .email(this.email)
+                .address(this.address)
+                .build();
+    }
+    public MemberDetailDto detailFromEntity() {
+        return MemberDetailDto.builder()
+                .id(this.id)
+                .name(this.name)
+                .email(this.email)
+                .age(this.age)
                 .build();
     }
 }

@@ -4,19 +4,21 @@ import com.example.beyond.ordersystem.member.domain.Member;
 import com.example.beyond.ordersystem.member.dto.MemberListDto;
 import com.example.beyond.ordersystem.member.dto.MemberSaveDto;
 import com.example.beyond.ordersystem.member.repository.MemberRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class MemberService {
 
     private final MemberRepository memberRepository;
 //    private final PasswordEncoder passwordEncoder;
 
+    @Autowired
     public MemberService(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
@@ -26,18 +28,16 @@ public class MemberService {
 //            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
 //        }
 //        Member member = dto.toEntity(passwordEncoder.encode(dto.getPassword()));
-        Member member = dto.toEntity();
-        Member savedMember = memberRepository.save(member);
-        return savedMember;
+        Member member = memberRepository.save(dto.toEntity());
+        return member;
     }
 
-    public List<MemberListDto> memberList() {
-        List<MemberListDto> MemberResDtoList = new ArrayList<>();
-        List<Member> MemberList = memberRepository.findAll();
-        for (Member Member : MemberList) {
-            MemberResDtoList.add(Member.listFromEntity());
-        }
-        return MemberResDtoList;
+    public Page<MemberListDto> memberList(Pageable pageable) {
+        Page<Member> members = memberRepository.findAll(pageable);
+        return members.map(a -> a.listFromEntity());
+//        Page<Member> members = memberRepository.findAll(pageable);
+//        Page<MemberListDto> memberListDtos = members.map(a -> a.listFromEntity());
+//        return memberListDtos;
     }
 
 
