@@ -28,9 +28,9 @@ public class MemberSaveDto {
     private Role role;
     private Address address;
 
-    public Member toEntity() {
+    public Member toEntity(String password) {
         return Member.builder()
-                .password(this.password)
+                .password(password)
                 .name(this.name)
                 .email(this.email)
                 .phone(this.phone)
