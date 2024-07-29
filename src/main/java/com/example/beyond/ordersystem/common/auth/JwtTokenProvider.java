@@ -18,9 +18,9 @@ public class JwtTokenProvider {
     private int expiration;
 
 
-    @Value("hackerton_secret")
+    @Value("${jwt.secretKeyRt}")
     private String secretKeyRt;
-    @Value("${jwt.expiration}")
+    @Value("${jwt.expirationRt}")
     private int expirationRt;
 
     public String createToken(String email, String role) {

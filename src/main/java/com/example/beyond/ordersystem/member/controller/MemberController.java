@@ -12,9 +12,11 @@ import com.example.beyond.ordersystem.member.service.MemberService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/member")
@@ -32,13 +35,17 @@ public class MemberController {
 
     private final MemberService memberService;
     private final JwtTokenProvider jwtTokenProvider;
-    @Value("${jwt.secretKey}Rt")
+    @Qualifier("2")
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    @Value("${jwt.secretKeyRt}")
     private String secretKeyRt;
 
     @Autowired
-    public MemberController(MemberService memberService, JwtTokenProvider jwtTokenProvider) {
+    public MemberController(MemberService memberService, JwtTokenProvider jwtTokenProvider, @Qualifier("2") RedisTemplate<String, Object> redisTemplate) {
         this.memberService = memberService;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.redisTemplate = redisTemplate;
     }
 
     @PostMapping("/create")
@@ -60,8 +67,10 @@ public class MemberController {
         Member member = memberService.login(dto);
         // 일치할 경우 accessToken 생성
         String jwtToken = jwtTokenProvider.createToken(member.getEmail(), member.getRole().toString());
-
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getEmail(), member.getRole().toString());
+
+        // redis -> email, rt를 key:value로 하여 저장
+        redisTemplate.opsForValue().set(member.getEmail(), refreshToken, 240, TimeUnit.HOURS); // 240 시간
         // 생성된 토큰을 CommonResDto 에 담아 사용자에게 return
         Map<String, Object> loginInfo = new HashMap<>();
         loginInfo.put("id", member.getId());
@@ -84,21 +93,29 @@ public class MemberController {
     @GetMapping("/myInfo")
     public ResponseEntity<Object> myInfo() {
         MemberListDto dto = memberService.myInfo();
-        CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "마이페이지로 이동합니다.",dto);
+        CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "마이페이지로 이동합니다.", dto);
         return new ResponseEntity<>(commonResDto, HttpStatus.OK);
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> generateNewAccessToken(@RequestBody MemberRefreshDto dto){
+    public ResponseEntity<?> generateNewAccessToken(@RequestBody MemberRefreshDto dto) {
         String rt = dto.getRefreshToken();
         Claims claims;
         try {
+            // 코드를 통해 rt 검증
             claims = Jwts.parser().setSigningKey(secretKeyRt).parseClaimsJws(rt).getBody(); // -> 이 한줄이 토큰 검증 코드
-        }catch (Exception e){
-            return new ResponseEntity<>(new CommonErrorDto(HttpStatus.UNAUTHORIZED, "invalid refresh token"),HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(new CommonErrorDto(HttpStatus.UNAUTHORIZED, "invalid refresh token"), HttpStatus.UNAUTHORIZED);
         }
         String email = claims.getSubject();
         String role = claims.get("role").toString();
+
+        // redis 조회하여 rt 추가 검증
+        Object obj = redisTemplate.opsForValue().get(email);
+        if (obj == null || !obj.toString().equals(rt)){
+            return new ResponseEntity<>(new CommonErrorDto(HttpStatus.UNAUTHORIZED, "invalid refresh token"), HttpStatus.UNAUTHORIZED);
+        }
 
         String newAccessToken = jwtTokenProvider.createToken(email, role);
         Map<String, Object> info = new HashMap<>();
