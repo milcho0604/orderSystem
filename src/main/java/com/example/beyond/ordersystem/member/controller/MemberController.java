@@ -9,7 +9,10 @@ import com.example.beyond.ordersystem.member.dto.MemberLoginDto;
 import com.example.beyond.ordersystem.member.dto.MemberRefreshDto;
 import com.example.beyond.ordersystem.member.dto.MemberSaveDto;
 import com.example.beyond.ordersystem.member.service.MemberService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +32,8 @@ public class MemberController {
 
     private final MemberService memberService;
     private final JwtTokenProvider jwtTokenProvider;
+    @Value("${jwt.secretKey}Rt")
+    private String secretKeyRt;
 
     @Autowired
     public MemberController(MemberService memberService, JwtTokenProvider jwtTokenProvider) {
@@ -85,7 +90,21 @@ public class MemberController {
 
     @PostMapping("/refresh-token")
     public ResponseEntity<?> generateNewAccessToken(@RequestBody MemberRefreshDto dto){
+        String rt = dto.getRefreshToken();
+        Claims claims;
+        try {
+            claims = Jwts.parser().setSigningKey(secretKeyRt).parseClaimsJws(rt).getBody(); // -> 이 한줄이 토큰 검증 코드
+        }catch (Exception e){
+            return new ResponseEntity<>(new CommonErrorDto(HttpStatus.UNAUTHORIZED, "invalid refresh token"),HttpStatus.UNAUTHORIZED);
+        }
+        String email = claims.getSubject();
+        String role = claims.get("role").toString();
 
-        return null;
+        String newAccessToken = jwtTokenProvider.createToken(email, role);
+        Map<String, Object> info = new HashMap<>();
+        info.put("token", newAccessToken);
+        CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "!!!AccessToken is renewed!!!", info);
+        return new ResponseEntity<>(commonResDto, HttpStatus.OK);
+
     }
 }

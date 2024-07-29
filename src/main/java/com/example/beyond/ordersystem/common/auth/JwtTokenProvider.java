@@ -18,7 +18,7 @@ public class JwtTokenProvider {
     private int expiration;
 
 
-    @Value("${jwt.secretKey}")
+    @Value("hackerton_secret")
     private String secretKeyRt;
     @Value("${jwt.expiration}")
     private int expirationRt;
