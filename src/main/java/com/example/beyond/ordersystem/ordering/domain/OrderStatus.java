@@ -1,5 +1,5 @@
 package com.example.beyond.ordersystem.ordering.domain;
 
 public enum OrderStatus {
-    ORDERED, CANCELD
+    ORDERED, CANCELED
 }

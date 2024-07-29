@@ -15,16 +15,20 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderSaveReqDto {
-    private OrderStatus orderStatus;
-    private Long member_id;
-    private List<OrderDetailDto> orderDetailDtoList;
 
-    @Data
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class OrderDetailDto {
-        private Long productId;
-        private Integer productCount;
-    }
+    private Long productId;
+    private Integer productCount;
+
+//    private Long member_id;
+//    private OrderStatus orderStatus;
+//    private List<OrderDetailDto> orderDetailDtoList;
+//
+//    @Data
+//    @Builder
+//    @AllArgsConstructor
+//    @NoArgsConstructor
+//    public static class OrderDetailDto {
+//        private Long productId;
+//        private Integer productCount;
+//    }
 }

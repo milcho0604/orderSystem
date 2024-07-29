@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8080
 
 
 spring:
@@ -27,3 +27,5 @@ logging:
 jwt:
   expiration: 30
   secretKey: my_token_secret
+  expirationRt: 14400
+  secretKeyRt: hackerton_secret

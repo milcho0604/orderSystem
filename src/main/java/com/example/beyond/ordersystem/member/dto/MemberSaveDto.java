@@ -25,8 +25,8 @@ public class MemberSaveDto {
     private String password;
     private Long age;
     private String phone;
-    private Role role;
     private Address address;
+    private Role role = Role.USER;
 
     public Member toEntity(String password) {
         return Member.builder()
@@ -36,6 +36,7 @@ public class MemberSaveDto {
                 .phone(this.phone)
                 .age(this.age)
                 .address(this.address)
+                .role(this.role)
                 .build();
 //        Member member = Member.builder()
 //                .password(this.password)
