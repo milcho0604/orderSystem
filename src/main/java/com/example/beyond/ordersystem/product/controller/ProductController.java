@@ -49,7 +49,7 @@ public class ProductController {
 
 // test
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/aws/create")
+    @PostMapping("/awsT/create")
     public ResponseEntity<?> productAwsCreatePost(@ModelAttribute ProductSaveDto dto, @RequestParam MultipartFile productImage){
         try {
             Product product = productService.productAwsCreate(dto);
