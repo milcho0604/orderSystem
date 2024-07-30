@@ -47,7 +47,7 @@ public class ProductController {
         return new ResponseEntity<>(commonResDto, HttpStatus.OK);
     }
 
-
+// test
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/aws/create")
     public ResponseEntity<?> productAwsCreatePost(@ModelAttribute ProductSaveDto dto, @RequestParam MultipartFile productImage){
