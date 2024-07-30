@@ -46,4 +46,19 @@ public class ProductController {
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "물품 목록을 조회합니다.", productResDtos);
         return new ResponseEntity<>(commonResDto, HttpStatus.OK);
     }
+
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/aws/create")
+    public ResponseEntity<?> productAwsCreatePost(@ModelAttribute ProductSaveDto dto, @RequestParam MultipartFile productImage){
+        try {
+            Product product = productService.productAwsCreate(dto);
+            CommonResDto commonResDto = new CommonResDto(HttpStatus.CREATED, "물품등록에 성공하였습니다.", product.getId());
+            return new ResponseEntity<>(commonResDto, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            CommonErrorDto commonErrorDto = new CommonErrorDto(HttpStatus.BAD_REQUEST, e.getMessage());
+            return new ResponseEntity<>(commonErrorDto, HttpStatus.BAD_REQUEST);
+        }
+    }
 }

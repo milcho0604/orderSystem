@@ -51,4 +51,23 @@ public class ProductService {
         Page<Product> products = productRepository.findAll(pageable);
         return products.map(a -> a.fromEntity());
     }
+
+    @Transactional
+    public Product productAwsCreate(ProductSaveDto dto) {
+        MultipartFile image = dto.getProductImage();
+        Product product = null;
+        try {
+            product = productRepository.save(dto.toEntity());
+            byte[] bytes = image.getBytes();
+            Path path = Paths.get("/Users/milcho/etc/tmp/",
+                    product.getId() + "_" + image.getOriginalFilename());
+            Files.write(path, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+            product.updateImagePath(path.toString());
+            // 위는 dirtyChecking 과정을 거쳐 변경을 감지한다. -> 다시 save 할 필요가 없음. !!
+        } catch (IOException e) {
+            throw new RuntimeException("이미지 저장에 실패했습니다.");
+        }
+        return product;
+    }
+
 }

@@ -51,7 +51,7 @@ public class JwtTokenProvider {
         String token = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)   // 생성시간
-                .setExpiration(new Date((now.getTime() + expirationRt * 60 * 1000L)))    // 만료시간 30분 : 30*60*1000L (밀리초 단위)
+                .setExpiration(new Date((now.getTime() + expirationRt * 60 * 1000L)))
                 .signWith(SignatureAlgorithm.HS256, secretKeyRt)
                 .compact();
         return token;
