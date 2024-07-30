@@ -1,5 +1,6 @@
 package com.example.beyond.ordersystem.product.service;
 
+import com.example.beyond.ordersystem.common.service.StockInventoryService;
 import com.example.beyond.ordersystem.product.domain.Product;
 import com.example.beyond.ordersystem.product.dto.ProductResDto;
 import com.example.beyond.ordersystem.product.dto.ProductSaveDto;
@@ -27,14 +28,16 @@ import java.nio.file.StandardOpenOption;
 public class ProductService {
     private final ProductRepository productRepository;
     private final S3Client s3Client;
+    private final StockInventoryService stockInventoryService;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, S3Client s3Client) {
+    public ProductService(ProductRepository productRepository, S3Client s3Client, StockInventoryService stockInventoryService) {
         this.productRepository = productRepository;
         this.s3Client = s3Client;
+        this.stockInventoryService = stockInventoryService;
     }
 
 
@@ -50,6 +53,10 @@ public class ProductService {
                     product.getId() + "_" + image.getOriginalFilename());
             Files.write(path, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
             product.updateImagePath(path.toString());
+
+            if (dto.getName().contains("sale")){
+                stockInventoryService.increaseStock(product.getId(), dto.getStock_quantity());
+            }
             // 위는 dirtyChecking 과정을 거쳐 변경을 감지한다. -> 다시 save 할 필요가 없음. !!
         } catch (IOException e) {
             throw new RuntimeException("이미지 저장에 실패했습니다.");

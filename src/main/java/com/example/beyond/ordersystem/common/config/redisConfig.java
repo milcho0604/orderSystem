@@ -49,4 +49,24 @@ public class redisConfig {
 //     redisTemplate.opsForValue().increment(); 증가
 //     redisTemplate.opsForValue().decrement(); 감소
 
+    @Bean
+    @Qualifier("3")
+    public RedisConnectionFactory stockFactory(){
+        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
+        redisStandaloneConfiguration.setHostName(host);
+        redisStandaloneConfiguration.setPort(port);
+        redisStandaloneConfiguration.setDatabase(2);
+        return new LettuceConnectionFactory(redisStandaloneConfiguration);
+    }
+
+    // redisTemplate : redis와 상호작용할때 redis key, value 형식을 정의
+    @Bean
+    @Qualifier("3")
+    public RedisTemplate<String, Object> stockRedisTemplate(@Qualifier("3") RedisConnectionFactory redisConnectionFactory){
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        return redisTemplate;
+    }
 }
