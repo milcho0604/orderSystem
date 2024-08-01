@@ -37,9 +37,9 @@ public class MemberController {
     private final JwtTokenProvider jwtTokenProvider;
     @Qualifier("2")
     private final RedisTemplate<String, Object> redisTemplate;
-
     @Value("${jwt.secretKeyRt}")
     private String secretKeyRt;
+
 
     @Autowired
     public MemberController(MemberService memberService, JwtTokenProvider jwtTokenProvider, @Qualifier("2") RedisTemplate<String, Object> redisTemplate) {

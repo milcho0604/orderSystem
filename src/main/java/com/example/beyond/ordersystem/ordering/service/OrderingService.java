@@ -8,6 +8,7 @@ import com.example.beyond.ordersystem.ordering.domain.OrderStatus;
 import com.example.beyond.ordersystem.ordering.domain.Ordering;
 import com.example.beyond.ordersystem.ordering.dto.OrderListResDto;
 import com.example.beyond.ordersystem.ordering.dto.OrderSaveReqDto;
+import com.example.beyond.ordersystem.ordering.event.StockDecreaseEvent;
 import com.example.beyond.ordersystem.ordering.repository.OrderDetailRepository;
 import com.example.beyond.ordersystem.ordering.repository.OrderingRepository;
 import com.example.beyond.ordersystem.product.domain.Product;
@@ -32,14 +33,16 @@ public class OrderingService {
     private final ProductRepository productRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final StockInventoryService stockInventoryService;
+    private final StockDecreaseEventHandler stockDecreaseEventHandler;
 
     @Autowired
-    public OrderingService(OrderingRepository orderingRepository, MemberRepository memberRepository, ProductRepository productRepository, OrderDetailRepository orderDetailRepository, StockInventoryService stockInventoryService) {
+    public OrderingService(OrderingRepository orderingRepository, MemberRepository memberRepository, ProductRepository productRepository, OrderDetailRepository orderDetailRepository, StockInventoryService stockInventoryService, StockDecreaseEventHandler stockDecreaseEventHandler) {
         this.orderingRepository = orderingRepository;
         this.memberRepository = memberRepository;
         this.productRepository = productRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.stockInventoryService = stockInventoryService;
+        this.stockDecreaseEventHandler = stockDecreaseEventHandler;
     }
 
     // Synchronized : 설정한다고 하더라도, 재고 감소가 DB에 반영되는 시점은 트랜잭션이 커밋되고 종료되는 시점이다
@@ -65,7 +68,7 @@ public class OrderingService {
                     throw new IllegalArgumentException("(redis) 재고가 부족합니다.");
                 }
                 // RDB 재고를 업데이트 : rabbitmq 통해 비동기적으로 이벤트 처리
-
+                stockDecreaseEventHandler.publish(new StockDecreaseEvent(product.getId(), dto.getProductCount()));
 
             } else {
                 if (quantity > product.getStock_quantity()) {
@@ -80,9 +83,9 @@ public class OrderingService {
                     .product(product)
                     .quantity(quantity)
                     .ordering(ordering)
-                    // orderingRepository.save(ordering);을 하지 않아,
-                    // ordering_id 는 아직 생성되지 않았지만, JPA가 자동으로 순서를 정렬하여 ordering_id 를 삽입한다.
                     .build();
+                    // orderingRepository.save(ordering);을 하지 않아,
+                    // ordering_id 는 아직 생성되지 않았지만, JPA가 자동으로 순서를 정렬하여 ordering_id 를 삽입한다.build();
             ordering.getOrderDetails().add(orderDetail);
         }
         Ordering savedOreder = orderingRepository.save(ordering);

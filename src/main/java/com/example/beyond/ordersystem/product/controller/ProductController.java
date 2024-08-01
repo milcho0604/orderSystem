@@ -26,7 +26,7 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     @PostMapping("/create")
     public ResponseEntity<?> productCreatePost(@ModelAttribute ProductSaveDto dto, @RequestParam MultipartFile productImage){
         try {

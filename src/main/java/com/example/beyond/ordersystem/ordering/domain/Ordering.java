@@ -44,8 +44,8 @@ public class Ordering {
             orderDetailDtos.add(orderDetail.fromEntity());
         }
 
-        OrderListResDto orderListResDto = OrderListResDto.builder()
-                .id(this.id)
+
+        OrderListResDto orderListResDto = OrderListResDto.builder().id(this.id)
                 .orderStatus(this.orderStatus)
                 .memberEmail(this.member.getEmail())
                 .orderDetailDtos(orderDetailDtos)
