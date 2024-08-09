@@ -1,8 +1,10 @@
 package com.example.beyond.ordersystem.ordering.service;
 
+import com.example.beyond.ordersystem.common.service.StockDecreaseEventHandler;
 import com.example.beyond.ordersystem.common.service.StockInventoryService;
 import com.example.beyond.ordersystem.member.domain.Member;
 import com.example.beyond.ordersystem.member.repository.MemberRepository;
+import com.example.beyond.ordersystem.ordering.controller.SseController;
 import com.example.beyond.ordersystem.ordering.domain.OrderDetail;
 import com.example.beyond.ordersystem.ordering.domain.OrderStatus;
 import com.example.beyond.ordersystem.ordering.domain.Ordering;
@@ -34,15 +36,17 @@ public class OrderingService {
     private final OrderDetailRepository orderDetailRepository;
     private final StockInventoryService stockInventoryService;
     private final StockDecreaseEventHandler stockDecreaseEventHandler;
+    private final SseController sseController;
 
     @Autowired
-    public OrderingService(OrderingRepository orderingRepository, MemberRepository memberRepository, ProductRepository productRepository, OrderDetailRepository orderDetailRepository, StockInventoryService stockInventoryService, StockDecreaseEventHandler stockDecreaseEventHandler) {
+    public OrderingService(OrderingRepository orderingRepository, MemberRepository memberRepository, ProductRepository productRepository, OrderDetailRepository orderDetailRepository, StockInventoryService stockInventoryService, StockDecreaseEventHandler stockDecreaseEventHandler, SseController sseController) {
         this.orderingRepository = orderingRepository;
         this.memberRepository = memberRepository;
         this.productRepository = productRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.stockInventoryService = stockInventoryService;
         this.stockDecreaseEventHandler = stockDecreaseEventHandler;
+        this.sseController = sseController;
     }
 
     // Synchronized : 설정한다고 하더라도, 재고 감소가 DB에 반영되는 시점은 트랜잭션이 커밋되고 종료되는 시점이다
@@ -89,6 +93,9 @@ public class OrderingService {
             ordering.getOrderDetails().add(orderDetail);
         }
         Ordering savedOreder = orderingRepository.save(ordering);
+
+        // 이메일을 유저이메일
+        sseController.publishMessage(savedOreder.fromEntity(), "admin@test.com");
         return savedOreder;
     }
 
@@ -119,7 +126,6 @@ public class OrderingService {
         Ordering ordering = orderingRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 주문입니다."));
         ordering.updateStatus(OrderStatus.CANCELED);
-
         return ordering;
     }
 

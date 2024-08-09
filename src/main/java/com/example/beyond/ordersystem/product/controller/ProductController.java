@@ -5,6 +5,7 @@ import com.example.beyond.ordersystem.common.dto.CommonResDto;
 import com.example.beyond.ordersystem.product.domain.Product;
 import com.example.beyond.ordersystem.product.dto.ProductResDto;
 import com.example.beyond.ordersystem.product.dto.ProductSaveDto;
+import com.example.beyond.ordersystem.product.dto.ProductSearchDto;
 import com.example.beyond.ordersystem.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -41,8 +42,8 @@ public class ProductController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<?> productList(Pageable pageable){
-        Page<ProductResDto> productResDtos = productService.productList(pageable);
+    public ResponseEntity<?> productList(Pageable pageable, ProductSearchDto searchDto){
+        Page<ProductResDto> productResDtos = productService.productList(searchDto, pageable);
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "물품 목록을 조회합니다.", productResDtos);
         return new ResponseEntity<>(commonResDto, HttpStatus.OK);
     }
@@ -61,4 +62,5 @@ public class ProductController {
             return new ResponseEntity<>(commonErrorDto, HttpStatus.BAD_REQUEST);
         }
     }
+
 }

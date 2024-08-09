@@ -1,4 +1,4 @@
-package com.example.beyond.ordersystem.ordering.service;
+package com.example.beyond.ordersystem.common.service;
 
 import com.example.beyond.ordersystem.common.config.RabbitmqConfigs;
 import com.example.beyond.ordersystem.ordering.event.StockDecreaseEvent;
@@ -29,21 +29,21 @@ public class StockDecreaseEventHandler {
     @Transactional
     @RabbitListener(queues = RabbitmqConfigs.STOCK_DECREASE_QUE)
     public void listen(Message message){
-        String messageBody = new String(message.getBody());
-        System.out.println(messageBody);
-        StockDecreaseEvent event = null;
-        // 	json 메시지를 parsing -> ObjectMapper/ StockDecreaseEvent
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            event = objectMapper.readValue(messageBody, StockDecreaseEvent.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // 	재고 업데이트
-        productRepository.findById(event.getProductId())
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 물품입니다."))
-                .UpdatStockQuantity(event.getProductCount());
+//        String messageBody = new String(message.getBody());
+//        System.out.println(messageBody);
+//        StockDecreaseEvent event = null;
+//        // 	json 메시지를 parsing -> ObjectMapper/ StockDecreaseEvent
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        try {
+//            event = objectMapper.readValue(messageBody, StockDecreaseEvent.class);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        // 	재고 업데이트
+//        productRepository.findById(event.getProductId())
+//                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 물품입니다."))
+//                .UpdatStockQuantity(event.getProductCount());
     }
 
 }

@@ -27,9 +27,4 @@ public class OrderListResDto {
         private String productName;
         private Integer count;
     }
-
-
-
-
-
 }

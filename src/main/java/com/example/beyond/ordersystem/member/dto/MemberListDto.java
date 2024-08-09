@@ -11,9 +11,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+// resDto
 public class MemberListDto {
     private Long id;
     private String email;
     private String name;
     private Address address;
+    private int orderCount;
 }

@@ -4,10 +4,7 @@ import com.example.beyond.ordersystem.common.auth.JwtTokenProvider;
 import com.example.beyond.ordersystem.common.dto.CommonErrorDto;
 import com.example.beyond.ordersystem.common.dto.CommonResDto;
 import com.example.beyond.ordersystem.member.domain.Member;
-import com.example.beyond.ordersystem.member.dto.MemberListDto;
-import com.example.beyond.ordersystem.member.dto.MemberLoginDto;
-import com.example.beyond.ordersystem.member.dto.MemberRefreshDto;
-import com.example.beyond.ordersystem.member.dto.MemberSaveDto;
+import com.example.beyond.ordersystem.member.dto.*;
 import com.example.beyond.ordersystem.member.service.MemberService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -20,7 +17,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -30,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/member")
-@Transactional(readOnly = true)
 public class MemberController {
 
     private final MemberService memberService;
@@ -106,7 +101,7 @@ public class MemberController {
             claims = Jwts.parser().setSigningKey(secretKeyRt).parseClaimsJws(rt).getBody(); // -> 이 한줄이 토큰 검증 코드
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(new CommonErrorDto(HttpStatus.UNAUTHORIZED, "invalid refresh token"), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new CommonErrorDto(HttpStatus.BAD_REQUEST, "invalid refresh token"), HttpStatus.BAD_REQUEST);
         }
         String email = claims.getSubject();
         String role = claims.get("role").toString();
@@ -114,14 +109,22 @@ public class MemberController {
         // redis 조회하여 rt 추가 검증
         Object obj = redisTemplate.opsForValue().get(email);
         if (obj == null || !obj.toString().equals(rt)){
-            return new ResponseEntity<>(new CommonErrorDto(HttpStatus.UNAUTHORIZED, "invalid refresh token"), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new CommonErrorDto(HttpStatus.BAD_REQUEST, "invalid refresh token"), HttpStatus.BAD_REQUEST);
         }
-
         String newAccessToken = jwtTokenProvider.createToken(email, role);
         Map<String, Object> info = new HashMap<>();
         info.put("token", newAccessToken);
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "!!!AccessToken is renewed!!!", info);
         return new ResponseEntity<>(commonResDto, HttpStatus.OK);
-
     }
+
+
+
+    @PatchMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDto dto){
+        memberService.resetPassword(dto);
+        CommonResDto commonResDto = new CommonResDto(HttpStatus.BAD_REQUEST,"비밀번호가 변경되었습니다.", "ok");
+        return new ResponseEntity<>(commonResDto, HttpStatus.OK);
+    }
+
 }

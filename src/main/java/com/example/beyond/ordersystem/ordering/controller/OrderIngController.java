@@ -53,7 +53,7 @@ public class OrderIngController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("{id}/cancel")
+    @PatchMapping("/cancel/{id}")
     public ResponseEntity<?> orderCancel(@PathVariable Long id){
         Ordering ordering = orderingService.orderCancel(id);
         CommonResDto commonResDto = new CommonResDto(HttpStatus.CREATED, "주문이 취소되었습니다.", ordering.getId());
