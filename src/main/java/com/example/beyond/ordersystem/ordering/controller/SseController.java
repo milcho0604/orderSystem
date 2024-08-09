@@ -45,7 +45,7 @@ public class SseController implements MessageListener {
         if (!subscribeList.contains(email)) {
             MessageListenerAdapter listenerAdapter = creatListenerAdapter(this);
             redisMessageListenerContainer.addMessageListener(listenerAdapter, new PatternTopic(email));
-            subscribeList.add(email);g
+            subscribeList.add(email);
         }
     }
 
