@@ -34,7 +34,7 @@ jobs:
           source: "./build/libs/*.jar"
           target: "/home/ubuntu"
       - name: install java and jar on ec2
-        uses: appleboy/ssh-actions@master
+        uses: appleboy/ssh-action@master
         with:
           host: ec2-3-36-126-204.ap-northeast-2.compute.amazonaws.com
           username: ubuntu
