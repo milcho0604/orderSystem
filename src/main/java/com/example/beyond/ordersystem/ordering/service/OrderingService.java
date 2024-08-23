@@ -1,6 +1,6 @@
 package com.example.beyond.ordersystem.ordering.service;
 
-import com.example.beyond.ordersystem.common.service.StockDecreaseEventHandler;
+//import com.example.beyond.ordersystem.common.service.StockDecreaseEventHandler;
 import com.example.beyond.ordersystem.common.service.StockInventoryService;
 import com.example.beyond.ordersystem.member.domain.Member;
 import com.example.beyond.ordersystem.member.repository.MemberRepository;
@@ -35,17 +35,19 @@ public class OrderingService {
     private final ProductRepository productRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final StockInventoryService stockInventoryService;
-    private final StockDecreaseEventHandler stockDecreaseEventHandler;
+//    private final StockDecreaseEventHandler stockDecreaseEventHandler;
     private final SseController sseController;
 
     @Autowired
-    public OrderingService(OrderingRepository orderingRepository, MemberRepository memberRepository, ProductRepository productRepository, OrderDetailRepository orderDetailRepository, StockInventoryService stockInventoryService, StockDecreaseEventHandler stockDecreaseEventHandler, SseController sseController) {
+    public OrderingService(OrderingRepository orderingRepository, MemberRepository memberRepository, ProductRepository productRepository, OrderDetailRepository orderDetailRepository, StockInventoryService stockInventoryService,
+//                           StockDecreaseEventHandler stockDecreaseEventHandler,
+                           SseController sseController) {
         this.orderingRepository = orderingRepository;
         this.memberRepository = memberRepository;
         this.productRepository = productRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.stockInventoryService = stockInventoryService;
-        this.stockDecreaseEventHandler = stockDecreaseEventHandler;
+//        this.stockDecreaseEventHandler = stockDecreaseEventHandler;
         this.sseController = sseController;
     }
 
@@ -72,7 +74,7 @@ public class OrderingService {
                     throw new IllegalArgumentException("(redis) 재고가 부족합니다.");
                 }
                 // RDB 재고를 업데이트 : rabbitmq 통해 비동기적으로 이벤트 처리
-                stockDecreaseEventHandler.publish(new StockDecreaseEvent(product.getId(), dto.getProductCount()));
+//                stockDecreaseEventHandler.publish(new StockDecreaseEvent(product.getId(), dto.getProductCount()));
 
             } else {
                 if (quantity > product.getStock_quantity()) {
