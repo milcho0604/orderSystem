@@ -82,7 +82,7 @@ public class ProductService {
             product = productRepository.save(dto.toEntity());
             byte[] bytes = image.getBytes();
             String filName = product.getId() + "_" + image.getOriginalFilename();
-            Path path = Paths.get("/Users/milcho/etc/tmp/", filName);
+            Path path = Paths.get("/tmp/", filName);
             Files.write(path, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
 
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
