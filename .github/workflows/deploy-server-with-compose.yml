@@ -33,10 +33,9 @@ jobs:
             if ! type docker > /dev/null ; then
               sudo snap install docker || echo "docker install failed"
             fi 
-            sudo docker login --username ${{secrets.DOCKER_EMAIL}} --password ${{secrets.DOCKER_PASSWORD}}
+            sudo docker login --username ${{secrets.DOCKER_EMAIL}} --password-stdin ${{secrets.DOCKER_PASSWORD}}
 
             sudo docker-compose pull && sudo docker-compose up -d
-
 
 
 # scp -i "my-keypair.pem" /Users/milcho/code/spring/orderSystem/docker-compose.yml ubuntu@ec2-3-39-223-238.ap-northeast-2.compute.amazonaws.com:/home/ubuntu
