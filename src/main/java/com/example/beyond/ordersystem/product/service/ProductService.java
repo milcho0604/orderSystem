@@ -78,6 +78,7 @@ public class ProductService {
     public Product productAwsCreate(ProductSaveDto dto) {
         MultipartFile image = dto.getProductImage();
         Product product = null;
+        
         try {
             product = productRepository.save(dto.toEntity());
             byte[] bytes = image.getBytes();
