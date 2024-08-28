@@ -12,5 +12,4 @@ public class webConfig {
     public PasswordEncoder makePassword() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
-
 }
